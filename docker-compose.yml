@@ -1,0 +1,64 @@
+#This is docker-compose version for SWARM using OVERLAY network
+# To run the services, use "docker stack deploy"
+# Prerequisite: the ZK service must be up and running
+version: '3.2'
+services:
+    kk1:
+        image: "registry.nhan.com:5000/kafka:2.0"
+        environment:
+            JMX_PORT: 8005
+            RMI_PORT: 8006
+        ports:
+            - 9092
+            - "8005:8005"
+            - "8006:8006"
+        command:  "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties --override broker.id=1 --override zookeeper.connect=zk1:2181,zk2:2181,zk3:2181 --override advertised.listeners=PLAINTEXT://kk1:9092"
+        volumes:
+          - kafkadata:/var/kafka
+        deploy:
+            replicas: 1
+            resources:
+                limits:
+                    cpus: '0.1'
+                    memory: 1G
+                reservations:
+                    cpus: '0.001'
+                    memory: 500M 
+            placement:
+                constraints:
+                    - node.hostname == centos1
+        networks:
+            default:        
+    kk2:
+        image: "registry.nhan.com:5000/kafka:2.0"
+        ports:
+            - "9092"          
+        command:  "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties --override broker.id=2 --override zookeeper.connect=zk1:2181,zk2:2181,zk3:2181  --override advertised.listeners=PLAINTEXT://kk2:9092"
+        volumes:
+          - kafkadata:/var/kafka
+        deploy:
+            replicas: 1
+            resources:
+                limits:
+                    cpus: '0.1'
+                    memory: 1G
+                reservations:
+                    cpus: '0.001'
+                    memory: 500M 
+            placement:
+                constraints:
+                    - node.hostname == centos2
+        networks:
+            default:       
+volumes:
+    kafkadata:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '/var/kafka'
+networks:
+    default:
+        external:
+            name: zk_zk_network
+# Kafka depends on zoo keeper. Therefore, we must join the Zookeeper network. Refer to the other of my repository to setup ZK cluster of 3 nodes
