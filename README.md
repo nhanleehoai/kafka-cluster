@@ -47,7 +47,7 @@ Also the three Zookeeper instance host names are zk1, zk2, zk3
 ```
 kafka-topics.sh --create  --zookeeper "zk1:2181,zk2:2181,zk3:2181" --replication-factor 2 --partitions 2 --topic topic1
 ```
-<img "src="docs/02-create-topic.png" />
+<img "src=docs/02-create-topic.png" />
 
 Describe it to see more information
 
