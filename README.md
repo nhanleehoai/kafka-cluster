@@ -115,5 +115,16 @@ Let describe the topic1 again
 Recall that "kk1" is on "centos1" with broker id ="1", same rule for the other 2 instance
 Look into the result That is what we expected!
 
+if you want to test the cluster performance of the cluster, use the command below. Increase the throught to stress test it
 
+In my brench mark, the the throughtput 10K messages per second on 1 cluster of 2 docker containers (the two Docker hosts has only 1vCPU and 2.75GB of RAM each) which is very impressive. With good design and architecture of partitions, we can certaintly scale up by adding new nodes.
+```
+kafka-run-class.sh   \
+    org.apache.kafka.tools.ProducerPerformance \
+        --topic topic1          \
+        --num-records 1000000 \
+        --record-size 100       \
+        --throughput 10000        \
+        --producer-props acks=1 bootstrap.servers=kk2:9092,kk1:9092
+```
 
